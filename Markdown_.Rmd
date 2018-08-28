@@ -1,0 +1,107 @@
+# Biodiversidad de Parques Nacionales en EEUU
+### *"...be used and preserved for the benefit of mankind."* \
+\ 
+De esta forma en 1864, John Conness, Senador de California, concreta la idea de la creación de una zona protegida donde la primisa es el cuidado de elementos naturales en Estados Unidos. El Valle de Yosemite es declarado la primera Zona Protegida, una iniciativa pionera en el mundo. \
+\
+***Sugerencia**: escucha el audio del siguiente video para mejor inspiracion*
+[![Mort Garson - Plantasia](http://img.youtube.com/vi/5ScquRuRIyE/0.jpg)](http://www.youtube.com/watch?v=5ScquRuRIyE "") \
+\
+\
+La idea romantica de ver al hombre inmerso en un ambiente salvaje, rodeado de bellezas naturales, toma fuerza dentro del país y en distintos rincones del mundo, generando tanto politicas públicas como campañas sociales que posteriormente se verian radicalizadas gracias al daño causado por la actividad industrial y la sobrepoblacion reflejados en el [Cambio Climatico](https://climate.nasa.gov). \
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+library(tidyverse)
+library(dplyr)
+species <- read_csv("~/Desktop/BIO4022 - AN\303\201LISIS Y MANIPULACI\303\223N DE DATOS EN R/biodiversity-in-national-parks/species.csv")
+species.summary <- select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
+Total.species <- count(species.summary, `Scientific Name`) 
+Total.Parks <- count(species.summary, `Park Name`)
+Total.Family <- count(species.summary, `Family`)
+Total.Category <- count(species.summary, Category)
+s <- Total.species %>% group_by(`Scientific Name`) %>% n_distinct()
+c <- Total.Category %>% group_by(`Category`) %>% n_distinct()
+p <- Total.Parks %>% group_by(`Park Name`) %>% n_distinct()
+f <- Total.Family %>% group_by(`Family`) %>% n_distinct()
+```
+\
+Actualmente, el [National Park Service](https://www.nps.gov/index.htm) (NPS) es responsable de 59 Parques Nacionales distribuidos por todo el país, que tienen por objetivo proteger y asegurar la conservacion de ambientes naturales y su biodiversidad. Hasta el 2016, se tiene [Registro de Biodiversidad](https://www.kaggle.com/nationalparkservice/park-biodiversity/home) de `r s` especies distintas de organizadas en `r f` Familias en `r p` Parques. \
+\
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+library(tidyverse)
+library(dplyr)
+library(ggmap)
+parks <- read_csv("~/Desktop/BIO4022 - AN\303\201LISIS Y MANIPULACI\303\223N DE DATOS EN R/biodiversity-in-national-parks/parks.csv")
+map <- get_map(location = 'USA', zoom = 4, maptype = "terrain")
+Map.Parks <- ggmap(map) + geom_point(data=parks, aes(x=Longitude, y=Latitude), alpha = 0.7, show_guide = FALSE, size=5)
+Map.Parks
+```
+\
+\
+Con el fin de conocer como se distribuyen los factores bioticos en los distintos Parques Nacionales de Estados Unidos y, proximamente, poder entender e identificar elementos de interes en la composición de estos ecosistemas aislados, se registró la frecuencia de todas las especies presentes, clasificadas en 3 grupos (Flora, Fauna y Hongos), a partir de las `r c` categorias señaladas, en todos los parques de Estados Unidos.
+\
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+species <- read_csv("~/Desktop/BIO4022 - AN\303\201LISIS Y MANIPULACI\303\223N DE DATOS EN R/biodiversity-in-national-parks/species.csv")
+species.summary <- select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
+FUNGI <- subset(species.summary, Category %in% "Fungi")
+FUNGI.F <- mutate(FUNGI, Group = "Fungi")
+SPECIES_FUNGI <- bind_rows(FUNGI.F)
+FREQUENCY.FUNGI <- SPECIES_FUNGI %>% count(`Park Name`, `Group`)
+ggplot(data=FREQUENCY.FUNGI, aes(x=`Park Name`, y=n, fill=Group)) + geom_bar(stat="identity", position=position_identity()) + scale_fill_manual(values=c("blue")) + coord_flip() + ggtitle("Biodiversidad de Hongos en Parques Nacionales") + labs(x = "Parques Nacionales", y = "Cantidad de Especies")
+```
+\
+\
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+species <- read_csv("~/Desktop/BIO4022 - AN\303\201LISIS Y MANIPULACI\303\223N DE DATOS EN R/biodiversity-in-national-parks/species.csv")
+species.summary <- select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
+ANIMAL <- subset(species.summary, Category %in% "Amphibian")
+ANIMAL2 <- subset(species.summary, Category %in% "Bird")
+ANIMAL3 <- subset(species.summary, Category %in% "Crab/Lobster/Shrimp")
+ANIMAL4 <- subset(species.summary, Category %in% "Fish")
+ANIMAL5 <- subset(species.summary, Category %in% "Insect")
+ANIMAL6 <- subset(species.summary, Category %in% "Invertebrate")
+ANIMAL7 <- subset(species.summary, Category %in% "Mammal")
+ANIMAL8 <- subset(species.summary, Category %in% "Reptile")
+ANIMAL9 <- subset(species.summary, Category %in% "Slug/Snail")
+ANIMAL10 <- subset(species.summary, Category %in% "Spider/Scorpion")
+FAUNA1 <- mutate(ANIMAL, Group = "Fauna")
+FAUNA2 <- mutate(ANIMAL2, Group = "Fauna")
+FAUNA3 <- mutate(ANIMAL3, Group = "Fauna")
+FAUNA4 <- mutate(ANIMAL4, Group = "Fauna")
+FAUNA5 <- mutate(ANIMAL5, Group = "Fauna")
+FAUNA6 <- mutate(ANIMAL6, Group = "Fauna")
+FAUNA7 <- mutate(ANIMAL7, Group = "Fauna")
+FAUNA8 <- mutate(ANIMAL8, Group = "Fauna")
+FAUNA9 <- mutate(ANIMAL9, Group = "Fauna")
+FAUNA10 <- mutate(ANIMAL10, Group = "Fauna")
+SPECIES_FAUNA <- bind_rows(FAUNA1, FAUNA2, FAUNA3, FAUNA4, FAUNA5, FAUNA6, FAUNA7, FAUNA8, FAUNA9, FAUNA10)
+FREQUENCY.FAUNA <- SPECIES_FAUNA %>% count(`Park Name`, `Group`)
+ggplot(data=FREQUENCY.FAUNA, aes(x=`Park Name`, y=n, fill=Group)) + geom_bar(stat="identity", position=position_identity()) + scale_fill_manual(values=c("turquoise")) + coord_flip() + ggtitle("Biodiversidad de Fauna en Parques Nacionales") + labs(x = "Parques Nacionales", y = "Cantidad de Especies")
+```
+\
+\
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+species <- read_csv("~/Desktop/BIO4022 - AN\303\201LISIS Y MANIPULACI\303\223N DE DATOS EN R/biodiversity-in-national-parks/species.csv")
+species.summary <- select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
+PLANTS1 <- subset(species.summary, Category %in% "Nonvascular Plant")
+PLANTS2 <- subset(species.summary, Category %in% "Vascular Plant")
+PLANTS3 <- subset(species.summary, Category %in% "Algae")
+FLORA1 <- mutate(PLANTS1, Group = "Flora")
+FLORA2 <- mutate(PLANTS2, Group = "Flora")
+FLORA3 <- mutate(PLANTS3, Group = "Flora")
+SPECIES_FLORA <- bind_rows(FLORA1, FLORA2, FLORA3)
+FREQUENCY.FLORA <- SPECIES_FLORA %>% count(`Park Name`, `Group`)
+ggplot(data=FREQUENCY.FLORA, aes(x=`Park Name`, y=n, fill=Group)) + geom_bar(stat="identity", position=position_identity()) + scale_fill_manual(values=c("darkblue")) + coord_flip() + ggtitle("Biodiversidad de Flora en Parques Nacionales") + labs(x = "Parques Nacionales", y = "Cantidad de Especies")
+```
+\
+\
+La composición diversa de especies muestra una tendencia 
+
+
