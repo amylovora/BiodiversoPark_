@@ -23,7 +23,7 @@ p <- Total.Parks %>% group_by(`Park Name`) %>% n_distinct()
 f <- Total.Family %>% group_by(`Family`) %>% n_distinct()
 ```
 \
-Actualmente, el [National Park Service](https://www.nps.gov/index.htm) (NPS) es responsable de 59 Parques Nacionales distribuidos por todo el país, que tienen por objetivo proteger y asegurar la conservacion de ambientes naturales y su biodiversidad. Hasta el 2016, se tiene [Registro de Biodiversidad](https://www.kaggle.com/nationalparkservice/park-biodiversity/home) de `r s` especies distintas de organizadas en `r f` Familias en `r p` Parques. \
+Actualmente, el [National Park Service](https://www.nps.gov/index.htm) (NPS) es responsable de 59 Parques Nacionales distribuidos por todo el país, que tienen por objetivo proteger y asegurar la conservación de ambientes naturales y su biodiversidad. Hasta el 2016, se tiene [Registro de Biodiversidad](https://www.kaggle.com/nationalparkservice/park-biodiversity/home) de `r s` especies distintas de organizadas en `r f` Familias en `r p` Parques. \
 \
 ```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
 library(tidyverse)
