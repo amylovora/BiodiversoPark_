@@ -11,7 +11,7 @@ La idea romantica de ver al hombre inmerso en un ambiente salvaje, rodeado de be
 ```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
 library(tidyverse)
 library(dplyr)
-species <- read_csv("~/Desktop/BIO4022 - AN\303\201LISIS Y MANIPULACI\303\223N DE DATOS EN R/biodiversity-in-national-parks/species.csv")
+species <- read_csv("species.csv")
 species.summary <- select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
 Total.species <- count(species.summary, `Scientific Name`) 
 Total.Parks <- count(species.summary, `Park Name`)
@@ -29,26 +29,28 @@ Actualmente, el [National Park Service](https://www.nps.gov/index.htm) (NPS) es 
 library(tidyverse)
 library(dplyr)
 library(ggmap)
-parks <- read_csv("~/Desktop/BIO4022 - AN\303\201LISIS Y MANIPULACI\303\223N DE DATOS EN R/biodiversity-in-national-parks/parks.csv")
+parks <- read_csv("parks.csv")
 map <- get_map(location = 'USA', zoom = 4, maptype = "terrain")
 Map.Parks <- ggmap(map) + geom_point(data=parks, aes(x=Longitude, y=Latitude), alpha = 0.7, show_guide = FALSE, size=5)
 Map.Parks
 ```
 \
 \
-Con el fin de conocer como se distribuyen los factores bioticos en los distintos Parques Nacionales de Estados Unidos y, proximamente, poder entender e identificar elementos de interes en la composición de estos ecosistemas aislados, se registró la frecuencia de todas las especies presentes, clasificadas en 3 grupos (Flora, Fauna y Hongos), a partir de las `r c` categorias señaladas, en todos los parques de Estados Unidos.
+Con el fin de conocer como se distribuyen los factores bioticos en los distintos Parques Nacionales de Estados Unidos y, proximamente, poder entender e identificar elementos de interés en la composición de estos ecosistemas aislados, se registró la diversidad de todas las especies presentes, clasificadas en 3 grupos (Flora, Fauna y Hongos), a partir de las `r c` categorias señaladas en la base de datos, en todos los parques de Estados Unidos.
+\
+\
 \
 ```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
 library(tidyverse)
 library(dplyr)
 library(ggplot2)
-species <- read_csv("~/Desktop/BIO4022 - AN\303\201LISIS Y MANIPULACI\303\223N DE DATOS EN R/biodiversity-in-national-parks/species.csv")
+species <- read_csv("species.csv")
 species.summary <- select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
 FUNGI <- subset(species.summary, Category %in% "Fungi")
 FUNGI.F <- mutate(FUNGI, Group = "Fungi")
 SPECIES_FUNGI <- bind_rows(FUNGI.F)
 FREQUENCY.FUNGI <- SPECIES_FUNGI %>% count(`Park Name`, `Group`)
-ggplot(data=FREQUENCY.FUNGI, aes(x=`Park Name`, y=n, fill=Group)) + geom_bar(stat="identity", position=position_identity()) + scale_fill_manual(values=c("blue")) + coord_flip() + ggtitle("Biodiversidad de Hongos en Parques Nacionales") + labs(x = "Parques Nacionales", y = "Cantidad de Especies")
+ggplot(data=FREQUENCY.FUNGI, aes(x=`Park Name`, y=n, fill=Group)) + geom_bar(stat="identity", position=position_identity()) + scale_fill_manual(values=c("blue")) + coord_flip() + ggtitle("Riqueza de especies Fungicas en Parques Nacionaless") + labs(x = "Parques Nacionales", y = "Cantidad de Especies")
 ```
 \
 \
@@ -56,7 +58,7 @@ ggplot(data=FREQUENCY.FUNGI, aes(x=`Park Name`, y=n, fill=Group)) + geom_bar(sta
 library(tidyverse)
 library(dplyr)
 library(ggplot2)
-species <- read_csv("~/Desktop/BIO4022 - AN\303\201LISIS Y MANIPULACI\303\223N DE DATOS EN R/biodiversity-in-national-parks/species.csv")
+species <- read_csv("species.csv")
 species.summary <- select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
 ANIMAL <- subset(species.summary, Category %in% "Amphibian")
 ANIMAL2 <- subset(species.summary, Category %in% "Bird")
@@ -80,7 +82,7 @@ FAUNA9 <- mutate(ANIMAL9, Group = "Fauna")
 FAUNA10 <- mutate(ANIMAL10, Group = "Fauna")
 SPECIES_FAUNA <- bind_rows(FAUNA1, FAUNA2, FAUNA3, FAUNA4, FAUNA5, FAUNA6, FAUNA7, FAUNA8, FAUNA9, FAUNA10)
 FREQUENCY.FAUNA <- SPECIES_FAUNA %>% count(`Park Name`, `Group`)
-ggplot(data=FREQUENCY.FAUNA, aes(x=`Park Name`, y=n, fill=Group)) + geom_bar(stat="identity", position=position_identity()) + scale_fill_manual(values=c("turquoise")) + coord_flip() + ggtitle("Biodiversidad de Fauna en Parques Nacionales") + labs(x = "Parques Nacionales", y = "Cantidad de Especies")
+ggplot(data=FREQUENCY.FAUNA, aes(x=`Park Name`, y=n, fill=Group)) + geom_bar(stat="identity", position=position_identity()) + scale_fill_manual(values=c("turquoise")) + coord_flip() + ggtitle("Riqueza Animales en Parques Nacionales") + labs(x = "Parques Nacionales", y = "Cantidad de Especies")
 ```
 \
 \
@@ -88,7 +90,7 @@ ggplot(data=FREQUENCY.FAUNA, aes(x=`Park Name`, y=n, fill=Group)) + geom_bar(sta
 library(tidyverse)
 library(dplyr)
 library(ggplot2)
-species <- read_csv("~/Desktop/BIO4022 - AN\303\201LISIS Y MANIPULACI\303\223N DE DATOS EN R/biodiversity-in-national-parks/species.csv")
+species <- read_csv("species.csv")
 species.summary <- select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
 PLANTS1 <- subset(species.summary, Category %in% "Nonvascular Plant")
 PLANTS2 <- subset(species.summary, Category %in% "Vascular Plant")
@@ -98,10 +100,58 @@ FLORA2 <- mutate(PLANTS2, Group = "Flora")
 FLORA3 <- mutate(PLANTS3, Group = "Flora")
 SPECIES_FLORA <- bind_rows(FLORA1, FLORA2, FLORA3)
 FREQUENCY.FLORA <- SPECIES_FLORA %>% count(`Park Name`, `Group`)
-ggplot(data=FREQUENCY.FLORA, aes(x=`Park Name`, y=n, fill=Group)) + geom_bar(stat="identity", position=position_identity()) + scale_fill_manual(values=c("darkblue")) + coord_flip() + ggtitle("Biodiversidad de Flora en Parques Nacionales") + labs(x = "Parques Nacionales", y = "Cantidad de Especies")
+ggplot(data=FREQUENCY.FLORA, aes(x=`Park Name`, y=n, fill=Group)) + geom_bar(stat="identity", position=position_identity()) + scale_fill_manual(values=c("darkblue")) + coord_flip() + ggtitle("Riqueza Plantas en Parques Nacionales") + labs(x = "Parques Nacionales", y = "Cantidad de Especies")
 ```
 \
 \
-La composición diversa de especies muestra una tendencia 
+La composición diversa de especies muestra una tendencia en la riqueza de especies vegetales, por sobre las animales y fúngicas, siendo ésta la menos abundante. Cabe destacar que hay ciertos parques como Great Smoky Mountains, Yellowstone y Hawaii Volcanoes donde hay mayor riqueza de animales. \
+\
+Para vizualizar mejor las diferencias entre parques, el siguiente gráfico unifica la riqueza de especies en las 3 categorías señaladas por Parque. \
+\
+\
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+species <- read_csv("species.csv")
+species.summary <- select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
+PLANTS1 <- subset(species.summary, Category %in% "Nonvascular Plant")
+PLANTS2 <- subset(species.summary, Category %in% "Vascular Plant")
+PLANTS3 <- subset(species.summary, Category %in% "Algae")
+FUNGI <- subset(species.summary, Category %in% "Fungi")
+ANIMAL <- subset(species.summary, Category %in% "Amphibian")
+ANIMAL2 <- subset(species.summary, Category %in% "Bird")
+ANIMAL3 <- subset(species.summary, Category %in% "Crab/Lobster/Shrimp")
+ANIMAL4 <- subset(species.summary, Category %in% "Fish")
+ANIMAL5 <- subset(species.summary, Category %in% "Insect")
+ANIMAL6 <- subset(species.summary, Category %in% "Invertebrate")
+ANIMAL7 <- subset(species.summary, Category %in% "Mammal")
+ANIMAL8 <- subset(species.summary, Category %in% "Reptile")
+ANIMAL9 <- subset(species.summary, Category %in% "Slug/Snail")
+ANIMAL10 <- subset(species.summary, Category %in% "Spider/Scorpion")
+FLORA1 <- mutate(PLANTS1, Group = "Flora")
+FLORA2 <- mutate(PLANTS2, Group = "Flora")
+FLORA3 <- mutate(PLANTS3, Group = "Flora")
+FUNGI.F <- mutate(FUNGI, Group = "Fungi")
+FAUNA1 <- mutate(ANIMAL, Group = "Fauna")
+FAUNA2 <- mutate(ANIMAL2, Group = "Fauna")
+FAUNA3 <- mutate(ANIMAL3, Group = "Fauna")
+FAUNA4 <- mutate(ANIMAL4, Group = "Fauna")
+FAUNA5 <- mutate(ANIMAL5, Group = "Fauna")
+FAUNA6 <- mutate(ANIMAL6, Group = "Fauna")
+FAUNA7 <- mutate(ANIMAL7, Group = "Fauna")
+FAUNA8 <- mutate(ANIMAL8, Group = "Fauna")
+FAUNA9 <- mutate(ANIMAL9, Group = "Fauna")
+FAUNA10 <- mutate(ANIMAL10, Group = "Fauna")
+SPECIES_GROUP <- bind_rows(FLORA1, FLORA2, FLORA3, FUNGI.F, FAUNA1, FAUNA2, FAUNA3, FAUNA4, FAUNA5, FAUNA6, FAUNA7, FAUNA8, FAUNA9, FAUNA10)
+FREQUENCY <- SPECIES_GROUP %>% count(`Park Name`, `Group`)
+ggplot(data=FREQUENCY, aes(x=`Park Name`, y=n, fill=Group)) + geom_bar(stat="identity", alpha=0.8, position=position_identity()) + scale_fill_manual(values=c("darkblue", "turquoise","blue")) + coord_flip() + ggtitle("Riqueza de Especies en Parques Nacionales") + labs(x = "Parques Nacionales", y = "Cantidad de Especies")
+```
+\
+\
+\
+Para mayor información acerca de alguna especie en particular, revisar el siguiente [Link](https://www.biodiversitylibrary.org) 
+
+
 
 

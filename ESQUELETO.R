@@ -4,8 +4,8 @@ library(ggplot2)
 library(ggmap)
 library(BiodiversityR)
 library(vegan)
-parks <- read_csv("~/Desktop/BIO4022 - AN\303\201LISIS Y MANIPULACI\303\223N DE DATOS EN R/biodiversity-in-national-parks/parks.csv")
-species <- read_csv("~/Desktop/BIO4022 - AN\303\201LISIS Y MANIPULACI\303\223N DE DATOS EN R/biodiversity-in-national-parks/species.csv")
+parks <- read_csv("parks.csv")
+species <- read_csv("species.csv")
 species.summary <- select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
 
 CONTAR LA CANTIDAD DE VARIABLES DISTINTAS
