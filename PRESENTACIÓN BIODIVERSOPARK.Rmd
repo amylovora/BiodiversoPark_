@@ -1,0 +1,321 @@
+---
+title: "Biodiversidad Parques Nacionales USA"
+author: "Valentina Reyes"
+date: "6/9/2018"
+output: 
+ ioslides_presentation:
+     incremental: true
+---
+
+## Servicio de Parques Nacionales de Estados Unidos 
+
+CACA
+
+## Servicio de Parques Nacionales de Estados Unidos
+
+Esta a cargo de 59 (NPS) Parques Nacionales y Reservas Naturales distribuidos en distintas zonas del pais\
+\
+- Proteger y asegurar la conservacion de ambientes naturales y su biodiversidad\
+- MAS CACA
+
+## Biodiversidad en Areas Protegidas
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+library(tidyverse)
+library(dplyr)
+library(readr)
+species <- read_csv("species.csv")
+species.summary <- select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
+Total.species <- count(species.summary, `Scientific Name`) 
+Total.Parks <- count(species.summary, `Park Name`)
+Total.Family <- count(species.summary, `Family`)
+Total.Category <- count(species.summary, Category)
+s <- Total.species %>% group_by(`Scientific Name`) %>% n_distinct()
+c <- Total.Category %>% group_by(`Category`) %>% n_distinct()
+p <- Total.Parks %>% group_by(`Park Name`) %>% n_distinct()
+f <- Total.Family %>% group_by(`Family`) %>% n_distinct()
+```
+
+Exite [Registro de la Biodiversidad](https://www.kaggle.com/nationalparkservice/park-biodiversity/home) de `r s` especies distintas de organizadas en `r f` Familias en los `r p` Parques.\
+\
+
+\
+
+
+## Objetivos {.build} 
+
+- Encontrar patrones de Diversidad asociados a la ubicación geográfica del Parque \
+\
+- Determinar si existe una correlacion entre la Riqueza de Especies para cada grupo y las Hectareas por Parque \
+\
+- Plantear posibles variables que intervengan en la relación \
+
+
+## Riqueza de Especies en los Parques Nacionales 
+
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(ggmap)
+library(tidyr)
+library(readr)
+library(rmarkdown)
+parks <- read_csv("parks.csv")
+species <- read_csv("species.csv")
+species.summary <- select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
+parks.summary <- select(parks, "Park Name", "Acres", "Longitude", "Latitude")
+FUNGI <- subset(species.summary, Category %in% "Fungi")
+FUNGI.F <- mutate(FUNGI, Group = "Fungi")
+SPECIES_FUNGI <- bind_rows(FUNGI.F)
+FREQUENCY.FUNGI <- SPECIES_FUNGI %>% count(`Park Name`, `Group`)
+ACRES.FUNGI <- inner_join(FREQUENCY.FUNGI, parks.summary)
+map1 <- get_map(location = 'USA', zoom = 4, maptype = "terrain")
+Map.Parks.Fungi <- ggmap(map1) + geom_point(data=ACRES.FUNGI, aes(x = Longitude, y = Latitude, colour=`n`), alpha = 0.8, show_guide = TRUE, size=4) + scale_colour_continuous(low = "yellow", high = "brown", space = "Lab", guide = "colorbar") + labs(x = "Longitud", y = "Latitud")
+Map.Parks.Fungi
+```
+Fig 1. Riqueza de Hongos en Parques Nacionales
+
+
+## Riqueza de Especies en los Parques Nacionales
+
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(ggmap)
+library(tidyr)
+library(readr)
+library(rmarkdown)
+parks <- read_csv("parks.csv")
+species <- read_csv("species.csv")
+species.summary <- select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
+parks.summary <- select(parks, "Park Name", "Acres", "Longitude", "Latitude")    
+ANIMAL <- subset(species.summary, Category %in% "Amphibian")
+ANIMAL2 <- subset(species.summary, Category %in% "Bird")
+ANIMAL3 <- subset(species.summary, Category %in% "Crab/Lobster/Shrimp")
+ANIMAL4 <- subset(species.summary, Category %in% "Fish")
+ANIMAL5 <- subset(species.summary, Category %in% "Insect")
+ANIMAL6 <- subset(species.summary, Category %in% "Invertebrate")
+ANIMAL7 <- subset(species.summary, Category %in% "Mammal")
+ANIMAL8 <- subset(species.summary, Category %in% "Reptile")
+ANIMAL9 <- subset(species.summary, Category %in% "Slug/Snail")
+ANIMAL10 <- subset(species.summary, Category %in% "Spider/Scorpion")
+FAUNA1 <- mutate(ANIMAL, Group = "Fauna")
+FAUNA2 <- mutate(ANIMAL2, Group = "Fauna")
+FAUNA3 <- mutate(ANIMAL3, Group = "Fauna")
+FAUNA4 <- mutate(ANIMAL4, Group = "Fauna")
+FAUNA5 <- mutate(ANIMAL5, Group = "Fauna")
+FAUNA6 <- mutate(ANIMAL6, Group = "Fauna")
+FAUNA7 <- mutate(ANIMAL7, Group = "Fauna")
+FAUNA8 <- mutate(ANIMAL8, Group = "Fauna")
+FAUNA9 <- mutate(ANIMAL9, Group = "Fauna")
+FAUNA10 <- mutate(ANIMAL10, Group = "Fauna")
+SPECIES_FAUNA <- bind_rows(FAUNA1, FAUNA2, FAUNA3, FAUNA4, FAUNA5, FAUNA6, FAUNA7, FAUNA8, FAUNA9, FAUNA10)
+FREQUENCY.FAUNA <- SPECIES_FAUNA %>% count(`Park Name`, `Group`)
+ACRES.FAUNA <- full_join(FREQUENCY.FAUNA, parks.summary)
+map2 <- get_map(location = 'USA', zoom = 4, maptype = "terrain")
+Map.Parks.Fauna <- ggmap(map2) + geom_point(data=ACRES.FAUNA, aes(x=Longitude, y=Latitude, colour=`n`), alpha = 0.8, show_guide = TRUE, size=4) + scale_colour_continuous(low = "yellow", high = "blue", space = "Lab", guide = "colorbar") + labs(x = "Longitud", y = "Latitud")
+Map.Parks.Fauna
+```
+Fig 2. Riqueza de Animales en Parques Nacionales
+
+## Riqueza de Especies en los Parques Nacionales {.smaller}
+
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(ggmap)
+library(tidyr)
+library(readr)
+library(rmarkdown)
+parks <- read_csv("parks.csv")
+species <- read_csv("species.csv")
+species.summary <- select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
+parks.summary <- select(parks, "Park Name", "Acres", "Longitude", "Latitude")    
+PLANTS1 <- subset(species.summary, Category %in% "Nonvascular Plant")
+PLANTS2 <- subset(species.summary, Category %in% "Vascular Plant")
+PLANTS3 <- subset(species.summary, Category %in% "Algae")
+FLORA1 <- mutate(PLANTS1, Group = "Flora")
+FLORA2 <- mutate(PLANTS2, Group = "Flora")
+FLORA3 <- mutate(PLANTS3, Group = "Flora")
+SPECIES_FLORA <- bind_rows(FLORA1, FLORA2, FLORA3)
+FREQUENCY.FLORA <- SPECIES_FLORA %>% count(`Park Name`, `Group`)
+ACRES.FLORA <- full_join(FREQUENCY.FLORA, parks.summary)
+map3 <- get_map(location = 'USA', zoom = 4, maptype = "terrain")
+Map.Parks.Flora <- ggmap(map3) + geom_point(data=ACRES.FLORA, aes(x=Longitude, y=Latitude, colour=`n`), alpha = 0.8, show_guide = TRUE, size=4) + scale_colour_continuous(low = "yellow", high = "dark green", space = "Lab", guide = "colorbar") + labs(x = "Longitud", y = "Latitud")
+Map.Parks.Flora
+```
+Fig 1. Riqueza de Flora en Parques Nacionales
+
+
+
+## Correlacion Especies Fungicas por Hectareas de Parque
+
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(readr)
+library(rmarkdown)
+parks <- read_csv("parks.csv")
+species <- read_csv("species.csv")
+species.summary <- select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
+parks.summary <- select(parks, "Park Name", "Acres", "Longitude", "Latitude")    
+FUNGI <- subset(species.summary, Category %in% "Fungi")
+FUNGI.F <- mutate(FUNGI, Group = "Fungi")
+SPECIES_FUNGI <- bind_rows(FUNGI.F)
+FREQUENCY.FUNGI <- SPECIES_FUNGI %>% count(`Park Name`, `Group`)
+ACRES.FUNGI <- inner_join(FREQUENCY.FUNGI, parks.summary)
+ggplot(ACRES.FUNGI, aes(x=Acres, y=n)) + geom_point() + xlab("Hectareas") + ylab("Riqueza de Especies") 
+```
+Fig 4. Diagrama de Dispersion Especies Fungicas por Hectareas Parque
+
+
+## Correlacion Especies Animales por Hectareas de Parque
+
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(ggmap)
+library(tidyr)
+library(readr)
+library(rmarkdown)
+parks <- read_csv("parks.csv")
+species <- read_csv("species.csv")
+species.summary <- select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
+parks.summary <- select(parks, "Park Name", "Acres", "Longitude", "Latitude")    
+ANIMAL <- subset(species.summary, Category %in% "Amphibian")
+ANIMAL2 <- subset(species.summary, Category %in% "Bird")
+ANIMAL3 <- subset(species.summary, Category %in% "Crab/Lobster/Shrimp")
+ANIMAL4 <- subset(species.summary, Category %in% "Fish")
+ANIMAL5 <- subset(species.summary, Category %in% "Insect")
+ANIMAL6 <- subset(species.summary, Category %in% "Invertebrate")
+ANIMAL7 <- subset(species.summary, Category %in% "Mammal")
+ANIMAL8 <- subset(species.summary, Category %in% "Reptile")
+ANIMAL9 <- subset(species.summary, Category %in% "Slug/Snail")
+ANIMAL10 <- subset(species.summary, Category %in% "Spider/Scorpion")
+FAUNA1 <- mutate(ANIMAL, Group = "Fauna")
+FAUNA2 <- mutate(ANIMAL2, Group = "Fauna")
+FAUNA3 <- mutate(ANIMAL3, Group = "Fauna")
+FAUNA4 <- mutate(ANIMAL4, Group = "Fauna")
+FAUNA5 <- mutate(ANIMAL5, Group = "Fauna")
+FAUNA6 <- mutate(ANIMAL6, Group = "Fauna")
+FAUNA7 <- mutate(ANIMAL7, Group = "Fauna")
+FAUNA8 <- mutate(ANIMAL8, Group = "Fauna")
+FAUNA9 <- mutate(ANIMAL9, Group = "Fauna")
+FAUNA10 <- mutate(ANIMAL10, Group = "Fauna")
+SPECIES_FAUNA <- bind_rows(FAUNA1, FAUNA2, FAUNA3, FAUNA4, FAUNA5, FAUNA6, FAUNA7, FAUNA8, FAUNA9, FAUNA10)
+FREQUENCY.FAUNA <- SPECIES_FAUNA %>% count(`Park Name`, `Group`)
+ACRES.FAUNA <- full_join(FREQUENCY.FLORA, parks.summary)
+ggplot(ACRES.FAUNA, aes(x=Acres, y=n)) + geom_point() + xlab("Hectareas") + ylab("Riqueza de Especies") 
+```
+Fig 4. Diagrama de Dispersion Especies Animales por Hectareas Parque
+
+
+## Correlacion Especies Vegetales por Hectareas de Parque
+
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+library(rmarkdown)
+library(readr)
+library(tidyverse)
+library(dplyr)
+library(tidyr)
+library(ggmap)
+parks <- read_csv("parks.csv")
+species <- read_csv("species.csv")
+species.summary <- select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
+parks.summary <- select(parks, "Park Name", "Acres", "Longitude", "Latitude")    
+PLANTS1 <- subset(species.summary, Category %in% "Nonvascular Plant")
+PLANTS2 <- subset(species.summary, Category %in% "Vascular Plant")
+PLANTS3 <- subset(species.summary, Category %in% "Algae")
+FLORA1 <- mutate(PLANTS1, Group = "Flora")
+FLORA2 <- mutate(PLANTS2, Group = "Flora")
+FLORA3 <- mutate(PLANTS3, Group = "Flora")
+SPECIES_FLORA <- bind_rows(FLORA1, FLORA2, FLORA3)
+FREQUENCY.FLORA <- SPECIES_FLORA %>% count(`Park Name`, `Group`)
+ACRES.FLORA <- full_join(FREQUENCY.FLORA, parks.summary)
+ggplot(ACRES.FLORA, aes(x=Acres, y=n)) + geom_point() + xlab("Hectareas") + ylab("Riqueza de Especies") 
+```
+Fig 6. Diagrama de Dispersion Especies Vegetales por Hectareas Parque
+
+
+## Correlacion de Diversidad de Especies por Hectareas de Parque
+
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(readr)
+library(rmarkdown)
+parks <- read_csv("parks.csv")
+species <- read_csv("species.csv")
+species.summary <- select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
+parks.summary <- select(parks, "Park Name", "Acres", "Longitude", "Latitude")    
+FUNGI <- subset(species.summary, Category %in% "Fungi")
+FUNGI.F <- mutate(FUNGI, Group = "Fungi")
+SPECIES_FUNGI <- bind_rows(FUNGI.F)
+FREQUENCY.FUNGI <- SPECIES_FUNGI %>% count(`Park Name`, `Group`)
+ACRES.FUNGI <- inner_join(FREQUENCY.FUNGI, parks.summary)
+ANIMAL <- subset(species.summary, Category %in% "Amphibian")
+ANIMAL2 <- subset(species.summary, Category %in% "Bird")
+ANIMAL3 <- subset(species.summary, Category %in% "Crab/Lobster/Shrimp")
+ANIMAL4 <- subset(species.summary, Category %in% "Fish")
+ANIMAL5 <- subset(species.summary, Category %in% "Insect")
+ANIMAL6 <- subset(species.summary, Category %in% "Invertebrate")
+ANIMAL7 <- subset(species.summary, Category %in% "Mammal")
+ANIMAL8 <- subset(species.summary, Category %in% "Reptile")
+ANIMAL9 <- subset(species.summary, Category %in% "Slug/Snail")
+ANIMAL10 <- subset(species.summary, Category %in% "Spider/Scorpion")
+FAUNA1 <- mutate(ANIMAL, Group = "Fauna")
+FAUNA2 <- mutate(ANIMAL2, Group = "Fauna")
+FAUNA3 <- mutate(ANIMAL3, Group = "Fauna")
+FAUNA4 <- mutate(ANIMAL4, Group = "Fauna")
+FAUNA5 <- mutate(ANIMAL5, Group = "Fauna")
+FAUNA6 <- mutate(ANIMAL6, Group = "Fauna")
+FAUNA7 <- mutate(ANIMAL7, Group = "Fauna")
+FAUNA8 <- mutate(ANIMAL8, Group = "Fauna")
+FAUNA9 <- mutate(ANIMAL9, Group = "Fauna")
+FAUNA10 <- mutate(ANIMAL10, Group = "Fauna")
+SPECIES_FAUNA <- bind_rows(FAUNA1, FAUNA2, FAUNA3, FAUNA4, FAUNA5, FAUNA6, FAUNA7, FAUNA8, FAUNA9, FAUNA10)
+FREQUENCY.FAUNA <- SPECIES_FAUNA %>% count(`Park Name`, `Group`)
+ACRES.FAUNA <- full_join(FREQUENCY.FLORA, parks.summary)
+PLANTS1 <- subset(species.summary, Category %in% "Nonvascular Plant")
+PLANTS2 <- subset(species.summary, Category %in% "Vascular Plant")
+PLANTS3 <- subset(species.summary, Category %in% "Algae")
+FLORA1 <- mutate(PLANTS1, Group = "Flora")
+FLORA2 <- mutate(PLANTS2, Group = "Flora")
+FLORA3 <- mutate(PLANTS3, Group = "Flora")
+SPECIES_FLORA <- bind_rows(FLORA1, FLORA2, FLORA3)
+FREQUENCY.FLORA <- SPECIES_FLORA %>% count(`Park Name`, `Group`)
+ACRES.FLORA <- full_join(FREQUENCY.FLORA, parks.summary)
+A <- c(ACRES.FUNGI$n)
+B <- c(ACRES.FUNGI$Acres)
+P.FUNGI <- round(cor.test(A, B, method = "pearson")$p.value, 2)
+C <- c(ACRES.FAUNA$n)
+D <- c(ACRES.FAUNA$Acres)
+P.FAUNA <- round(cor.test(C, D, method = "pearson")$p.value, 2)
+Z <- c(ACRES.FLORA$n)
+W <- c(ACRES.FLORA$Acres)
+P.FLORA <- round(cor.test(Z, W, method = "pearson")$p.value, 2)
+```
+
+\
+- No existe una correlación entre el Tamaño del Parque y la Cantidad de Especies Fungicas ( p= ` r P.FUNGI` ) \
+\
+- No existe una correlación entre el Tamaño del Parque y la Cantidad de Especies Animales ( p= ` r P.FAUNA` ) \
+\
+- No existe una correlación entre el Tamaño del Parque y la Cantidad de Especies Vegetales ( p= ` r P.FLORA` ) \
+
+
+## Discusión y Conclusión {.build}
+
+
+- No existe relacion entre el tamaño del Parque y la Riqueza de especies en cada uno de los grupos analizados \
+\
+- Posiblemente las especies invasoras estén desplazando a las especies nativas \
+ \
+- No existen patrones de aumento o disminucion de la diversidad asociados a la zona geografica en la que se ubica el Parque
