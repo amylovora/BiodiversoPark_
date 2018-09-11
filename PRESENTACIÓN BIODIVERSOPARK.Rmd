@@ -51,7 +51,7 @@ Esta a cargo de 59 Reservas Naturales distribuidos en distintas zonas del pais\
 
 
 
-## Riqueza de Especies en los Parques Nacionales 
+## Riqueza de Especies en los Parques Nacionales {.small}
 
 ```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
 library(tidyverse)
@@ -79,7 +79,7 @@ Fig 1. Riqueza de Hongos en Parques Nacionales
 
 
 
-## Riqueza de Especies en los Parques Nacionales
+## Riqueza de Especies en los Parques Nacionales {.small}
 
 ```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
 library(tidyverse)
@@ -125,7 +125,7 @@ Fig 2. Riqueza de Animales en Parques Nacionales
 
 
 
-## Riqueza de Especies en los Parques Nacionales {.smaller}
+## Riqueza de Especies en los Parques Nacionales {.small}
 
 ```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
 library(tidyverse)
@@ -157,7 +157,7 @@ Fig 1. Riqueza de Flora en Parques Nacionales
 
 
 
-## Correlacion Especies Fungicas por Hectareas de Parque
+## Correlacion Especies Fungicas por Hectareas de Parque {.small}
 
 ```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
 library(tidyverse)
@@ -182,7 +182,7 @@ Fig 4. Diagrama de Dispersion Especies Fungicas por Hectareas Parque
 
 
 
-## Correlacion Especies Animales por Hectareas de Parque
+## Correlacion Especies Animales por Hectareas de Parque {.small}
 
 ```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
 library(tidyverse)
@@ -225,7 +225,7 @@ Fig 4. Diagrama de Dispersion Especies Animales por Hectareas Parque
 
 
 
-## Correlacion Especies Vegetales por Hectareas de Parque
+## Correlacion Especies Vegetales por Hectareas de Parque {.small}
 
 ```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
 library(rmarkdown)
@@ -253,7 +253,7 @@ Fig 6. Diagrama de Dispersion Especies Vegetales por Hectareas Parque
 
 
 
-## Correlacion de Diversidad de Especies por Hectareas de Parque
+## Correlacion de Diversidad de Especies por Hectareas de Parque {.small}
 
 ```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
 library(tidyverse)
