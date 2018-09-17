@@ -1,0 +1,366 @@
+---
+title: "Biodiversidad de Parques Nacionales"
+author: "Valentina Reyes"
+date: " `r Sys.Date()` " 
+output: pdf_document
+bibliography: bibliografia.bib
+---
+
+## Introducción
+
+La pérdida de biodiversidad a causa de la actividad humana ha sido uno de las grandes problemas ambientales, del cual distintas organizaciones gubernamentales y privadas han intentado dar solución con intentos de controlar la destrucción de ecosistemas [@fancy2009monitoring], legislando grandes extensiones geográficas como "Parques Nacionales" con el fin de proteger y conservar la naturaleza. 
+
+Estos programas centran sus esfuerzos en mantener monitoreado las condiciones de los recursos naturales de las Zonas Protegidas, entendiendo el rol ecológico que cumple una especies o un grupo de especies sobre el lugar. De esta forma, se puede determinar cuáles son las mejores prácticas de manejo en programas de conservación [@perez2014caracterizacion].
+
+Generalmente, los criterios para seleccionar Reservas Naturales unifica los objetivos centrales de conservación y gestión ambiental, al tiempo que satisface otras necesidades humanas como la provisión de servicios ecosistémicos [@roberts2003application], esperando que la prohibición de la intervención humana mantenga el equilibrio natural de las cadenas tróficas y, por lo tanto, encontrar mayor biodiversidad en una zona protegida comparada a una extensión de tierra de las mismas dimensiones y/o características ambientales afectada por especies invasoras [@foucat2007modelos]. Sin embargo, esto no siempre es así y el efecto indirecto del Calentamiento Global ha sido el principal y preocupante postulado al por qué la biodiversidad en Zonas Protegidas ha decaído fuertemente pese a los esfuerzos puestos en ello [@burns2003global]. Las perturbaciones ecosistemicas pueden llegar a alcanzar niveles dramáticos si la disminución de precipitaciones y el alza de la temperatura en las zonas de clima, principalmente, mediterráneo son tales que la absorción de carbono se reduce a niveles en que la biomasa forestal puede pasar de ser sumideros a  fuentes netas de carbono (CO2) [@pardos2010ecosistemas] 
+
+El Servicio de Parques Nacionales (NPS, por sus siglas en ingles), es una agencia federal encargada de la gestion de Parques, Monumentos Naturales y Zonas Protegidas en los Estados Unidos, establecido en 1916 por Stephen Mather su primer director [@center2014national]. 
+
+Hoy está acargo de 59 reservas naturales distribuidas por todo el país, varios destacandose por su tamaño como el Parque Nacional Wrangell - St. Elias (Alska) que comprende el 16% del total del sistema (53.000 km2), uno de los más grandes del mundo [@slocombe1992kluane] y Yellowstone famoso por sus fenómenos geotérmicos, nombrado el primer Parque Nacional de Estados Unidos [@muir1898yellowstone].
+
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE, cache=TRUE}
+library(tidyverse)
+library(dplyr)
+library(readr)
+species <- read_csv("species.csv")
+species.summary <- dplyr::select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
+Total.species <- count(species.summary, `Scientific Name`) 
+Total.Parks <- count(species.summary, `Park Name`)
+Total.Category <- count(species.summary, Category)
+s <- Total.species %>% group_by(`Scientific Name`) %>% n_distinct()
+c <- Total.Category %>% group_by(`Category`) %>% n_distinct()
+p <- Total.Parks %>% group_by(`Park Name`) %>% n_distinct()
+```
+
+Hasta el 2016, NPS cuenta con un registro de biodiversidad de `r p` Parques, contabilizando en total aproximadamente `r s` especies distintas. La siguiente tabla muestra la cantidad de especies registrada en cada Parque. 
+
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE, cache=TRUE}
+library(tidyverse)
+library(dplyr)
+library(readr)
+library(knitr)
+library(kableExtra)
+species <- read_csv("species.csv")
+parks <- read_csv("parks.csv")
+parks.summary <- dplyr::select(parks, "Park Name", "Acres", "Longitude", "Latitude")
+species.summary <- dplyr::select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
+Total.Parks <- count(species.summary, `Park Name`) 
+knitr::kable(Total.Parks, align = "l") %>% kable_styling(bootstrap_options = c("striped", "bordered", "condensed"), full_width = FALSE , position = "left", font_size = 10) %>% add_header_above(c("Abundancia de Especies en Parques Nacionales de Estados Unidos"))
+```
+
+En este reporte se va a comparar la relación que existe entre la extención y ubicaciónn geográfica de cada parque, agrupando las especies en tres grupos: Plantas, Animales y Hongos. Con esta información, se generará un acercamiento del estado de conservación de los Parques Nacionales de Estados Unidos e identificar cuál de estos grupos se pueda ver posiblemente afectado, directa o indirectamente, por el Calentamiento Global, especies invasoras, incendios forestales, contaminación, etc. 
+
+
+## Métodos
+
+Este reporte fue realizado con el software R [@Rsoftware], utilizando los paquetes tidyverse [@Wickham2017], dplyr [@WickhamandCia2018], ggplot2 [@Wickham2016], ggmap [@Kahle2013], tidyr [@WickhamandHenry2018] y rmarkdown [@Allaire2018].
+
+- Base de Datos de National Park Service (https://www.kaggle.com/nationalparkservice/park-biodiversity/home) 
+
+## Resultados
+
+
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE, cache=TRUE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(ggmap)
+library(tidyr)
+library(readr)
+library(rmarkdown)
+parks <- read_csv("parks.csv")
+species <- read_csv("species.csv")
+species.summary <- dplyr::select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
+parks.summary <- dplyr::select(parks, "Park Name", "Acres", "Longitude", "Latitude")
+FUNGI <- subset(species.summary, Category %in% "Fungi")
+FUNGI.F <- mutate(FUNGI, Group = "Fungi")
+SPECIES_FUNGI <- bind_rows(FUNGI.F)
+FREQUENCY.FUNGI <- SPECIES_FUNGI %>% count(`Park Name`, `Group`)
+ACRES.FUNGI <- inner_join(FREQUENCY.FUNGI, parks.summary)
+map1 <- ggmap::get_map(location = 'USA', zoom = 4, maptype = "terrain")
+Map.Parks.Fungi <- ggmap(map1) + geom_point(data=ACRES.FUNGI, aes(x = Longitude, y = Latitude, colour=`n`), alpha = 0.8, show_guide = TRUE, size=4) + scale_colour_continuous(low = "yellow", high = "brown", space = "Lab", guide = "colorbar") + labs(x = "Longitud", y = "Latitud")
+Map.Parks.Fungi
+```
+
+Fig 1. Riqueza de Especies de Hongos en Parques Nacionales
+\
+\
+Redwood National Park es quien posee la mayor riqueza de especies con un total de 1363 especies distintas, seguido de Shenandoah National Park y Great Smoky Mountains National Park con 765 y 632 especies respectivamente. No parece existir un sesgo en la ubicación geográfica del parque con el aumento en la biodiversidad. Sin embargo, en el suroeste del país se observa una disminusión en la biodiversidad.
+
+Para este análisis en particular sólo se consta de la información de biodiversidad de especies Fúngicas de 32 Parques Nacionales. 
+\
+\
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE, cache=TRUE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(ggmap)
+library(tidyr)
+library(readr)
+library(rmarkdown)
+parks <- read_csv("parks.csv")
+species <- read_csv("species.csv")
+species.summary <- dplyr::select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
+parks.summary <- dplyr::select(parks, "Park Name", "Acres", "Longitude", "Latitude")    
+ANIMAL <- subset(species.summary, Category %in% "Amphibian")
+ANIMAL2 <- subset(species.summary, Category %in% "Bird")
+ANIMAL3 <- subset(species.summary, Category %in% "Crab/Lobster/Shrimp")
+ANIMAL4 <- subset(species.summary, Category %in% "Fish")
+ANIMAL5 <- subset(species.summary, Category %in% "Insect")
+ANIMAL6 <- subset(species.summary, Category %in% "Invertebrate")
+ANIMAL7 <- subset(species.summary, Category %in% "Mammal")
+ANIMAL8 <- subset(species.summary, Category %in% "Reptile")
+ANIMAL9 <- subset(species.summary, Category %in% "Slug/Snail")
+ANIMAL10 <- subset(species.summary, Category %in% "Spider/Scorpion")
+FAUNA1 <- mutate(ANIMAL, Group = "Fauna")
+FAUNA2 <- mutate(ANIMAL2, Group = "Fauna")
+FAUNA3 <- mutate(ANIMAL3, Group = "Fauna")
+FAUNA4 <- mutate(ANIMAL4, Group = "Fauna")
+FAUNA5 <- mutate(ANIMAL5, Group = "Fauna")
+FAUNA6 <- mutate(ANIMAL6, Group = "Fauna")
+FAUNA7 <- mutate(ANIMAL7, Group = "Fauna")
+FAUNA8 <- mutate(ANIMAL8, Group = "Fauna")
+FAUNA9 <- mutate(ANIMAL9, Group = "Fauna")
+FAUNA10 <- mutate(ANIMAL10, Group = "Fauna")
+SPECIES_FAUNA <- bind_rows(FAUNA1, FAUNA2, FAUNA3, FAUNA4, FAUNA5, FAUNA6, FAUNA7, FAUNA8, FAUNA9, FAUNA10)
+FREQUENCY.FAUNA <- SPECIES_FAUNA %>% count(`Park Name`, `Group`)
+ACRES.FAUNA <- full_join(FREQUENCY.FAUNA, parks.summary)
+map2 <- ggmap::get_map(location = 'USA', zoom = 4, maptype = "terrain")
+Map.Parks.Fauna <- ggmap(map2) + geom_point(data=ACRES.FAUNA, aes(x=Longitude, y=Latitude, colour=`n`), alpha = 0.8, show_guide = TRUE, size=4) + scale_colour_continuous(low = "yellow", high = "blue", space = "Lab", guide = "colorbar") + labs(x = "Longitud", y = "Latitud")
+Map.Parks.Fauna
+```
+
+Fig 2. Riqueza de Especies Animales en Parques Nacionales
+\
+\
+Great Smoky Mountains National Park alberga un total 3289 especies Animales distintas, seguido de Redwood National Park y Yellowstone National Park con 2328 y 2316 especies respectivamente. No hay un patrón de relación entre la ubicación geográfica del parque con el aumento y/o disminución en la biodiversidad. 
+
+
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE, cache=TRUE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(ggmap)
+library(tidyr)
+library(readr)
+library(rmarkdown)
+parks <- read_csv("parks.csv")
+species <- read_csv("species.csv")
+species.summary <- dplyr::select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
+parks.summary <- dplyr::select(parks, "Park Name", "Acres", "Longitude", "Latitude")    
+PLANTS1 <- subset(species.summary, Category %in% "Nonvascular Plant")
+PLANTS2 <- subset(species.summary, Category %in% "Vascular Plant")
+PLANTS3 <- subset(species.summary, Category %in% "Algae")
+FLORA1 <- mutate(PLANTS1, Group = "Flora")
+FLORA2 <- mutate(PLANTS2, Group = "Flora")
+FLORA3 <- mutate(PLANTS3, Group = "Flora")
+SPECIES_FLORA <- bind_rows(FLORA1, FLORA2, FLORA3)
+FREQUENCY.FLORA <- SPECIES_FLORA %>% count(`Park Name`, `Group`)
+ACRES.FLORA <- full_join(FREQUENCY.FLORA, parks.summary)
+map3 <- ggmap::get_map(location = 'USA', zoom = 4, maptype = "terrain")
+Map.Parks.Flora <- ggmap(map3) + geom_point(data=ACRES.FLORA, aes(x=Longitude, y=Latitude, colour=`n`), alpha = 0.8, show_guide = TRUE, size=4) + scale_colour_continuous(low = "yellow", high = "dark green", space = "Lab", guide = "colorbar") + labs(x = "Longitud", y = "Latitud")
+Map.Parks.Flora
+```
+
+Fig 3. Riqueza de Especies Vegetales en Parques Nacionales
+\
+\
+En Shenandoah National Park se registró un total de 3111 especies distintas, seguido de Great Smoky Mountains National Park y Redwood National Park con 2702 y 2619 especies respectivamente. No hay un patrón de relación entre la ubicación geográfica del parque con el aumento y/o disminución en la biodiversidad.
+\
+\
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE, cache=TRUE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(readr)
+library(rmarkdown)
+parks <- read_csv("parks.csv")
+species <- read_csv("species.csv")
+species.summary <- dplyr::select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
+parks.summary <- dplyr::select(parks, "Park Name", "Acres", "Longitude", "Latitude")    
+FUNGI <- subset(species.summary, Category %in% "Fungi")
+FUNGI.F <- mutate(FUNGI, Group = "Fungi")
+SPECIES_FUNGI <- bind_rows(FUNGI.F)
+FREQUENCY.FUNGI <- SPECIES_FUNGI %>% count(`Park Name`, `Group`)
+ACRES.FUNGI <- inner_join(FREQUENCY.FUNGI, parks.summary)
+ggplot(ACRES.FUNGI, aes(x=Acres, y=n)) + geom_point() + xlab("Hectareas") + ylab("Riqueza de Especies") 
+```
+
+Fig 4. Diagrama de Dispersion Especies Fungicas por Hectareas Parque
+\
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE, cache=TRUE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(readr)
+library(rmarkdown)
+parks <- read_csv("parks.csv")
+species <- read_csv("species.csv")
+species.summary <- dplyr::select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
+parks.summary <- dplyr::select(parks, "Park Name", "Acres", "Longitude", "Latitude")    
+FUNGI <- subset(species.summary, Category %in% "Fungi")
+FUNGI.F <- mutate(FUNGI, Group = "Fungi")
+SPECIES_FUNGI <- bind_rows(FUNGI.F)
+FREQUENCY.FUNGI <- SPECIES_FUNGI %>% count(`Park Name`, `Group`)
+ACRES.FUNGI <- inner_join(FREQUENCY.FUNGI, parks.summary)
+A <- c(ACRES.FUNGI$n)
+B <- c(ACRES.FUNGI$Acres)
+P.FUNGI <- round(cor.test(A, B, method = "pearson")$p.value, 2)
+```
+
+No se observa una correlación entre el Tamaño del Parque y la Cantidad de Especies Fungicas ( p= `r P.FUNGI` ). Redwood National Park y Shenandoah National Park representan los dos puntos outliers más importantes que desplazan los resultados, pues se registran como los parques con menor extensión territorial y gran biodiversidad, 1363 y 765 especies distintas respectivamente. Por otro lado, Gates Of The Arctic National Park and Preserve la reserva más grande en el registro de especies fúngicas sólo presenta 474 especies.
+ 
+\
+\
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE, cache=TRUE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(ggmap)
+library(tidyr)
+library(readr)
+library(rmarkdown)
+parks <- read_csv("parks.csv")
+species <- read_csv("species.csv")
+species.summary <- dplyr::select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
+parks.summary <- dplyr::select(parks, "Park Name", "Acres", "Longitude", "Latitude")    
+ANIMAL <- subset(species.summary, Category %in% "Amphibian")
+ANIMAL2 <- subset(species.summary, Category %in% "Bird")
+ANIMAL3 <- subset(species.summary, Category %in% "Crab/Lobster/Shrimp")
+ANIMAL4 <- subset(species.summary, Category %in% "Fish")
+ANIMAL5 <- subset(species.summary, Category %in% "Insect")
+ANIMAL6 <- subset(species.summary, Category %in% "Invertebrate")
+ANIMAL7 <- subset(species.summary, Category %in% "Mammal")
+ANIMAL8 <- subset(species.summary, Category %in% "Reptile")
+ANIMAL9 <- subset(species.summary, Category %in% "Slug/Snail")
+ANIMAL10 <- subset(species.summary, Category %in% "Spider/Scorpion")
+FAUNA1 <- mutate(ANIMAL, Group = "Fauna")
+FAUNA2 <- mutate(ANIMAL2, Group = "Fauna")
+FAUNA3 <- mutate(ANIMAL3, Group = "Fauna")
+FAUNA4 <- mutate(ANIMAL4, Group = "Fauna")
+FAUNA5 <- mutate(ANIMAL5, Group = "Fauna")
+FAUNA6 <- mutate(ANIMAL6, Group = "Fauna")
+FAUNA7 <- mutate(ANIMAL7, Group = "Fauna")
+FAUNA8 <- mutate(ANIMAL8, Group = "Fauna")
+FAUNA9 <- mutate(ANIMAL9, Group = "Fauna")
+FAUNA10 <- mutate(ANIMAL10, Group = "Fauna")
+SPECIES_FAUNA <- bind_rows(FAUNA1, FAUNA2, FAUNA3, FAUNA4, FAUNA5, FAUNA6, FAUNA7, FAUNA8, FAUNA9, FAUNA10)
+FREQUENCY.FAUNA <- SPECIES_FAUNA %>% count(`Park Name`, `Group`)
+ACRES.FAUNA <- full_join(FREQUENCY.FAUNA, parks.summary)
+ggplot(ACRES.FAUNA, aes(x=Acres, y=n)) + geom_point() + xlab("Hectareas") + ylab("Riqueza de Especies") 
+```
+
+Fig 5. Diagrama de Dispersion Especies Animales por Hectareas Parque
+\
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE, cache=TRUE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(readr)
+library(rmarkdown)
+parks <- read_csv("parks.csv")
+species <- read_csv("species.csv")
+species.summary <- dplyr::select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
+parks.summary <- dplyr::select(parks, "Park Name", "Acres", "Longitude", "Latitude")    
+ANIMAL <- subset(species.summary, Category %in% "Amphibian")
+ANIMAL2 <- subset(species.summary, Category %in% "Bird")
+ANIMAL3 <- subset(species.summary, Category %in% "Crab/Lobster/Shrimp")
+ANIMAL4 <- subset(species.summary, Category %in% "Fish")
+ANIMAL5 <- subset(species.summary, Category %in% "Insect")
+ANIMAL6 <- subset(species.summary, Category %in% "Invertebrate")
+ANIMAL7 <- subset(species.summary, Category %in% "Mammal")
+ANIMAL8 <- subset(species.summary, Category %in% "Reptile")
+ANIMAL9 <- subset(species.summary, Category %in% "Slug/Snail")
+ANIMAL10 <- subset(species.summary, Category %in% "Spider/Scorpion")
+FAUNA1 <- mutate(ANIMAL, Group = "Fauna")
+FAUNA2 <- mutate(ANIMAL2, Group = "Fauna")
+FAUNA3 <- mutate(ANIMAL3, Group = "Fauna")
+FAUNA4 <- mutate(ANIMAL4, Group = "Fauna")
+FAUNA5 <- mutate(ANIMAL5, Group = "Fauna")
+FAUNA6 <- mutate(ANIMAL6, Group = "Fauna")
+FAUNA7 <- mutate(ANIMAL7, Group = "Fauna")
+FAUNA8 <- mutate(ANIMAL8, Group = "Fauna")
+FAUNA9 <- mutate(ANIMAL9, Group = "Fauna")
+FAUNA10 <- mutate(ANIMAL10, Group = "Fauna")
+SPECIES_FAUNA <- bind_rows(FAUNA1, FAUNA2, FAUNA3, FAUNA4, FAUNA5, FAUNA6, FAUNA7, FAUNA8, FAUNA9, FAUNA10)
+FREQUENCY.FAUNA <- SPECIES_FAUNA %>% count(`Park Name`, `Group`)
+ACRES.FAUNA <- full_join(FREQUENCY.FAUNA, parks.summary)
+C <- c(ACRES.FAUNA$n)
+D <- c(ACRES.FAUNA$Acres)
+P.FAUNA <- round(cor.test(C, D, method = "pearson")$p.value, 2)
+```
+
+Nuevamente, no se observa una correlación entre el Tamaño del Parque y la Cantidad de Especies Animales ( p= `r P.FAUNA` ). Wrangell - St Elias y Gates Of The Arctic National Park and Preserve se destacan por tener gran extensión territorial y poca biodiversidad: 432 y 191 especies animales distintas respectivamente. En el otro extremo de los casos, Congaree y Haleakala National Park se distinguen por concentrar gran parte de la biodiversidad en un escaso tamaño. 
+
+Sin embargo, diferencia de la dirpersión de especies fúngicas, Death Valley National Park cumple con los supuestos esperados. En 4740912 hectáreas, uno de los más grandes registrads, se encuentran 1976 especies animales distintas.
+
+\
+\
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE, cache=TRUE}
+library(rmarkdown)
+library(readr)
+library(tidyverse)
+library(dplyr)
+library(tidyr)
+library(ggmap)
+parks <- read_csv("parks.csv")
+species <- read_csv("species.csv")
+species.summary <- dplyr::select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
+parks.summary <- dplyr::select(parks, "Park Name", "Acres", "Longitude", "Latitude")    
+PLANTS1 <- subset(species.summary, Category %in% "Nonvascular Plant")
+PLANTS2 <- subset(species.summary, Category %in% "Vascular Plant")
+PLANTS3 <- subset(species.summary, Category %in% "Algae")
+FLORA1 <- mutate(PLANTS1, Group = "Flora")
+FLORA2 <- mutate(PLANTS2, Group = "Flora")
+FLORA3 <- mutate(PLANTS3, Group = "Flora")
+SPECIES_FLORA <- bind_rows(FLORA1, FLORA2, FLORA3)
+FREQUENCY.FLORA <- SPECIES_FLORA %>% count(`Park Name`, `Group`)
+ACRES.FLORA <- full_join(FREQUENCY.FLORA, parks.summary)
+ggplot(ACRES.FLORA, aes(x=Acres, y=n)) + geom_point() + xlab("Hectareas") + ylab("Riqueza de Especies") 
+```
+
+Fig 6. Diagrama de Dispersion Especies Vegetales por Hectareas Parque
+\
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE, cache=TRUE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(readr)
+library(rmarkdown)
+parks <- read_csv("parks.csv")
+species <- read_csv("species.csv")
+species.summary <- dplyr::select(species, `Park Name`, `Category`, `Family`, `Scientific Name`, `Nativeness`)
+parks.summary <- dplyr::select(parks, "Park Name", "Acres", "Longitude", "Latitude")    
+PLANTS1 <- subset(species.summary, Category %in% "Nonvascular Plant")
+PLANTS2 <- subset(species.summary, Category %in% "Vascular Plant")
+PLANTS3 <- subset(species.summary, Category %in% "Algae")
+FLORA1 <- mutate(PLANTS1, Group = "Flora")
+FLORA2 <- mutate(PLANTS2, Group = "Flora")
+FLORA3 <- mutate(PLANTS3, Group = "Flora")
+SPECIES_FLORA <- bind_rows(FLORA1, FLORA2, FLORA3)
+FREQUENCY.FLORA <- SPECIES_FLORA %>% count(`Park Name`, `Group`)
+ACRES.FLORA <- full_join(FREQUENCY.FLORA, parks.summary)
+Z <- c(ACRES.FLORA$n)
+W <- c(ACRES.FLORA$Acres)
+P.FLORA <- round(cor.test(Z, W, method = "pearson")$p.value, 2)
+```
+
+No hay una correlación entre el Tamaño del Parque y la Cantidad de Especies Vegetales ( p= `r P.FLORA` ). Una vez más Wrangell - St Elias y Gates Of The Arctic National Park and Preserve, los más grandes, se destacan por tener escasa biodiversidad: 1363 y 688 especies vegetales distintas respectivamente. En caso contrario, Hot Springs y Haleakala National Park outliers con alta biodiversidad y tamaño reducido. 
+
+Al igual que la dispersión de Animales, hay reservas que cumplen con los supuestos esperados: Great Smoky Mountains National Park con una extensión de 521490 hectáreas, un tamaño medio se registran 2702 especies vegetales distintas. Para ambos casos, estos punto y similares nos indica la imposibilidad de plantear un modelo donde la Biodiversidad sea inversamente proporcional al tamaño de la Reserva.
+\
+
+
+## Conclusión
+
+Para los tres grupos de biodiversidad no se observa un sesgo de relación entre la ubicación geográfica del Parque y la alta o baja Riqueza de Especies. Sin embargo, se destacan Great Smoky Mountains y Readwood quienes poseen mayor diversidad de especies en su ecosistema. 
+
+Las dimensiones geográficas de cada parque tampoco parecen influir en la biodiversidad de especies Fúngicas, Animales y Vegetales, donde los puntos son incoherentes entre sí: Parques de un tamaño reducido con gran biodiversidad y viceversa, Parques de gran tamaño con gran biodiversidad y viceversa. Factores indirectos podrían explicar este patrón de comportamiento.
+
+
+## Referencias
+
